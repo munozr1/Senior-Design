@@ -18,17 +18,12 @@ static boolean connected = false;
 static boolean doScan = false;
 static BLERemoteCharacteristic* pRemoteCharacteristic;
 static BLEAdvertisedDevice* myDevice;
-
-const int ledPin = 8;
-bool isLedOn = false;
+bool dead = false;
 
 void toggleLed() {
-  if (isLedOn) {
-    digitalWrite(ledPin, LOW); // Turn off the LED
-  } else {
-    digitalWrite(ledPin, HIGH); // Turn on the LED
-  }
-  isLedOn = !isLedOn; // Toggle the LED state
+  if (!dead) {
+    digitalWrite(RGB_BUILTIN, LOW); // Turn off the LED
+  } 
 }
 
 static void notifyCallback(
@@ -123,10 +118,10 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 
 void setup() {
+  digitalWrite(RGB_BUILTIN, HIGH);
   Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
   BLEDevice::init("");
-  pinMode(ledPin, OUTPUT);
   // Retrieve a Scanner and set the callback we want to use to be informed when we
   // have detected a new device.  Specify that we want active scanning and start the
   // scan to run for 5 seconds.
