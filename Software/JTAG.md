@@ -57,6 +57,7 @@ framework = arduino
 upload_speed = 115200
 monitor_speed = 115200
 debug_tool = esp-prog
+debug_speed = 500
 debug_init_break = break setup
 upload_port = [your esp32 port]
 ```
