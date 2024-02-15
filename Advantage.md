@@ -45,3 +45,7 @@ Check out Starting position F->B
 Here is a Tier List based on the initial travel distance of each Starting position
 
 <img src="./Images/DistancTierList.JPG" style="border-radius: 25px" alt="drawing" width="800"/>
+
+As you can see, if we are only allowed to charge at each station for maximum of 10 seconds, those who start at stations <strong>H, G, C, E</strong> have a clear advantage. 
+
+Those in S tier charging stations only have to move 6.32 ft before another 10 seconds of charging while those in D tier must cover 9ft before charging for only 10 seconds.
