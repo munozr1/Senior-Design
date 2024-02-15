@@ -1,4 +1,9 @@
 /*
+  Bit Bangers ESP-NOW "Kill Switch" Receiver Code
+  github.com/munozr1/Senior-Design
+
+  Original Code:
+  
   Rui Santos
   Complete project details at https://RandomNerdTutorials.com/esp-now-esp32-arduino-ide/
   
@@ -9,25 +14,39 @@
   copies or substantial portions of the Software.
 */
 
+/*
+ ----------------------------------- Libraries ---------------------------------
+*/
 #include <esp_now.h>
 #include <WiFi.h>
 
-// Structure example to receive data
-// Must match the sender structure
+/*
+------------------------------------- Defines ----------------------------------
+*/
+
+/*
+------------------------------------ Structures --------------------------------
+*/
 typedef struct struct_message {
     char a[32];
 } struct_message;
 
+/*
+--------------------------------  Global Variables -----------------------------
+*/
 bool toggleLED = false;
-
-// Create a struct_message called myData
 struct_message myData;
 
+/*
+------------------------------------ Functions ---------------------------------
+*/
 // callback function that will be executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&myData, incomingData, sizeof(myData));
 
   if (!strcmp(myData.a, "kill")) {
+    // This code simply turns on the builtin LED
+    // Todo: Power off all peripherals and ESP32 here
     if (toggleLED) {
       digitalWrite(LED_BUILTIN, LOW);
       toggleLED = false;
