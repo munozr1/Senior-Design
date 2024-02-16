@@ -2,7 +2,7 @@
 #  Car Charging Strategy with 360-Degree Radar
 
 ## Overview
-This document outlines a strategic approach for a remote-controlled () car race, where cars are powered by super capacitors and need to stop at charging stations around the track. The key to winning is either by being the last car still powered or by overtaking all other cars.
+This document outlines a strategic approach for the IEEE competition, where cars are powered by super capacitors and need to stop at charging stations around the track. The key to winning is either by being the last car still powered or by overtaking all other cars.
 
 ## Strategy
 Our  car will implement a 360-degree radar system. This allows it to monitor the positions of other cars and strategically decide when to leave a charging station.
