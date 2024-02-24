@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 //Circular buffer size is 180 because the LiDAR sensor has a 180 degree field of view
-#define BUFFER_SIZE 180
+#define BUFFER_SIZE 1000
 #define MAP_SIZE 150
 #define PI 3.14159265358979323846
 
@@ -28,7 +28,7 @@ struct Coordinate {
 
 extern pthread_mutex_t map_mutex;
 extern int map[MAP_SIZE][MAP_SIZE];
-extern struct Coordinate map_ring_buffer[180];
+extern struct Coordinate map_ring_buffer[BUFFER_SIZE];
 extern int buffer_head;
 extern int buffer_tail;
 

@@ -3,13 +3,14 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <string.h>
+#include <unistd.h>
 
 // create map and buffer
 pthread_mutex_t map_mutex = PTHREAD_MUTEX_INITIALIZER;
 int map[MAP_SIZE][MAP_SIZE] = {0};
-struct Coordinate map_ring_buffer[180];
-int buffer_head;
-int buffer_tail;
+struct Coordinate map_ring_buffer[BUFFER_SIZE];
+int buffer_head = 0;
+int buffer_tail = 0;
 
 pthread_mutex_t daq_fd_mutex = PTHREAD_MUTEX_INITIALIZER;
 int daq_fd; // File Descriptor: used to read the com port. In unix, everything
@@ -37,8 +38,8 @@ int main(void) {
 
   // Configure port
   memset(&tio, 0, sizeof(tio));
-  cfsetospeed(&tio, B115200);
-  cfsetispeed(&tio, B115200);
+  cfsetospeed(&tio, B9600);
+  cfsetispeed(&tio, B9600);
   tio.c_cflag &= ~PARENB;
   tio.c_cflag &= ~CSTOPB;
   tio.c_cflag &= ~CSIZE;
@@ -62,7 +63,7 @@ int main(void) {
     close(daq_fd);
     return -1;
   } else {
-    printf("delete thread created");
+    printf("delete thread created \n");
   }
 
   // Set starting position, this should be set via bluetooth or something. Hard
@@ -71,23 +72,40 @@ int main(void) {
   current_location.y = 45;
   int dir = 0;
 
-  // pthread_join(&daq_thread_id, NULL);
-  pthread_join(&del_thread_id, NULL);
-  while(1){
+pthread_join(&daq_thread_id, NULL);
+pthread_join(&del_thread_id, NULL);
+// while(1){
 
+// }
+// Main loop: print the map
+#ifdef DEBUG
+  while (1) {
+    pthread_mutex_lock(&map_mutex);
+    printf("main => map_mutex obtained\n");
+    printf("main => map_mutex released\n");
+    pthread_mutex_unlock(&map_mutex);
+    sleep(1);
   }
-  // Main loop: print the map
-  // while (1) {
-  //   pthread_mutex_lock(&map_mutex);
-  //   system("clear");
-  //   print_map();
-  //   pthread_mutex_unlock(&map_mutex);
-  //   sleep(1);
-  // }
+#else
+  int temp_map[MAP_SIZE][MAP_SIZE] = {0};
+  while (1) {
+    pthread_mutex_lock(&map_mutex);
+    //copy map to temp_map
+    for (int i = 0; i < MAP_SIZE; i++) {
+      for (int j = 0; j < MAP_SIZE; j++) {
+        temp_map[i][j] = map[i][j];
+      }
+    }
+    pthread_mutex_unlock(&map_mutex);
+    system("clear");
+    print_map();
+    sleep(1);
+  }
 
   // if thread ends early close the fd
   pthread_mutex_lock(&daq_fd_mutex);
   close(daq_fd);
   pthread_mutex_unlock(&daq_fd_mutex);
+#endif
   return 0;
 }

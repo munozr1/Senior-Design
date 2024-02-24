@@ -42,12 +42,19 @@ void map_point(char *polarCoord) {
   // Add the point to the ring buffer. Add a timestamp so that the deletion
   // thread knows when to delete the point
   pthread_mutex_lock(&map_mutex);
+#ifdef DEBUG
+  printf("map_point() => map_mutex obtained, buffer_tail = %d\n", buffer_tail);
+#endif
   map_ring_buffer[buffer_tail].x = gridX;
   map_ring_buffer[buffer_tail].y = gridY;
   time(&map_ring_buffer[buffer_tail].created);
-  buffer_tail = (buffer_tail + 1) % 180; // wrap around the ring buffer
-  // print the time stamp
-  //  printf("Time stamp: %s\n", ctime(&map_ring_buffer[buffer_tail].created));
+// print the time stamp
+#ifdef DEBUG
+  printf("(%d, %d) %s\n", map_ring_buffer[buffer_tail].x,
+         map_ring_buffer[buffer_tail].y,
+         ctime(&map_ring_buffer[buffer_tail].created));
+#endif
+  buffer_tail = (buffer_tail + 1) % BUFFER_SIZE; // wrap around the ring buffer
 
   if (gridX >= 0 && gridX < MAP_SIZE && gridY >= 0 && gridY < MAP_SIZE) {
     map[gridX][gridY] = 1;
@@ -55,25 +62,44 @@ void map_point(char *polarCoord) {
     printf("Point map[%d][%d] (%lf, %lf) is out of bounds\n", gridX, gridY,
            distance, angle);
   }
+#ifdef DEBUG
+  printf("map_point() => map_mutex released\n");
+#endif
   pthread_mutex_unlock(&map_mutex);
 }
 
 void *del_thread_buffer_del() {
-
-  // Iterate while the head points to a point that's too old
+  sleep(1);
   while (1) {
     pthread_mutex_lock(&map_mutex);
+#ifdef DEBUG
+    printf("del_thread_buffer_del() => map_mutex obtained, buffer_head = %d timestamp = %s\n", buffer_head, ctime(&map_ring_buffer[buffer_head].created));
+#endif
+
     time_t currentTime;
     time(&currentTime);
-    if (difftime(currentTime, map_ring_buffer[buffer_head].created) > 1) {
+
+    // Iterate while the head points to a point that's too old
+    while (buffer_head != buffer_tail && difftime(currentTime, map_ring_buffer[buffer_head].created) > 1) {
       map[map_ring_buffer[buffer_head].x][map_ring_buffer[buffer_head].y] = 0;
-      // print deleted point
-      printf("Deleted point: %d, %d\n", map_ring_buffer[buffer_head].x,map_ring_buffer[buffer_head].y);
+#ifdef DEBUG
+      printf("del_thread_buffer_del() => Deleting point (%d, %d) %s\n", map_ring_buffer[buffer_head].x,map_ring_buffer[buffer_head].y,ctime(&map_ring_buffer[buffer_head].created));
+#endif
+      buffer_head = (buffer_head + 1) % BUFFER_SIZE;
     }
-    buffer_head = (buffer_head + 1) % 180;
+    system("clear");
+    print_map();
+    sleep(1);
+
+#ifdef DEBUG
+    if(buffer_head == buffer_tail) {
+        printf("BUFFER EMPTY!\n");
+        sleep(1);
+    }
+    printf("del_thread_buffer_del() => map_mutex released\n");
+#endif
     pthread_mutex_unlock(&map_mutex);
   }
-
   return 0;
 }
 
