@@ -102,10 +102,6 @@ pthread_join(&del_thread_id, NULL);
     sleep(1);
   }
 
-  // if thread ends early close the fd
-  pthread_mutex_lock(&daq_fd_mutex);
-  close(daq_fd);
-  pthread_mutex_unlock(&daq_fd_mutex);
 #endif
   return 0;
 }
