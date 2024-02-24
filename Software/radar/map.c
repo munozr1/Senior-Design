@@ -21,10 +21,12 @@ double deg2rad(double deg) { return deg * (PI / 180); }
 void map_point(char *polarCoord) {
   double distance, angle;
 
-  //parse the polar coordinate input string
-  sscanf(polarCoord, "%lf@%lf",  &angle,&distance);
-  // if we read a distance bigger than we can accomidate just ignore it. This is more used for testing purposes. Its a good saftey though.
-  if(distance > MAP_SIZE) return;
+  // parse the polar coordinate input string
+  sscanf(polarCoord, "%lf@%lf", &angle, &distance);
+  // if we read a distance bigger than we can accomidate just ignore it. This is
+  // more used for testing purposes. Its a good saftey though.
+  if (distance > MAP_SIZE)
+    return;
 
   angle = deg2rad(angle);
   int x = (int)(distance * cos(angle));
@@ -37,12 +39,15 @@ void map_point(char *polarCoord) {
     return;
   }
 
-  //Add the point to the ring buffer. Add a timestamp so that the deletion thread knows when to delete the point
+  // Add the point to the ring buffer. Add a timestamp so that the deletion
+  // thread knows when to delete the point
   pthread_mutex_lock(&map_mutex);
   map_ring_buffer[buffer_tail].x = gridX;
   map_ring_buffer[buffer_tail].y = gridY;
-  buffer_tail = (buffer_tail+1) % 180; //wrap around the ring buffer
   time(&map_ring_buffer[buffer_tail].created);
+  buffer_tail = (buffer_tail + 1) % 180; // wrap around the ring buffer
+  // print the time stamp
+  //  printf("Time stamp: %s\n", ctime(&map_ring_buffer[buffer_tail].created));
 
   if (gridX >= 0 && gridX < MAP_SIZE && gridY >= 0 && gridY < MAP_SIZE) {
     map[gridX][gridY] = 1;
@@ -53,34 +58,34 @@ void map_point(char *polarCoord) {
   pthread_mutex_unlock(&map_mutex);
 }
 
+void *del_thread_buffer_del() {
 
-
-void * del_thread_buffer_del(){
+  // Iterate while the head points to a point that's too old
+  while (1) {
     pthread_mutex_lock(&map_mutex);
-
     time_t currentTime;
     time(&currentTime);
-
-    // Iterate while the head points to a point that's too old
-    while (difftime(currentTime, map_ring_buffer[buffer_head].created) > 1) {
-        map[map_ring_buffer[buffer_head].x][map_ring_buffer[buffer_head].y] = 0;
-        buffer_head = (buffer_head + 1) % 180;
+    if (difftime(currentTime, map_ring_buffer[buffer_head].created) > 1) {
+      map[map_ring_buffer[buffer_head].x][map_ring_buffer[buffer_head].y] = 0;
+      // print deleted point
+      printf("Deleted point: %d, %d\n", map_ring_buffer[buffer_head].x,map_ring_buffer[buffer_head].y);
     }
-
+    buffer_head = (buffer_head + 1) % 180;
     pthread_mutex_unlock(&map_mutex);
-    return 0;
+  }
+
+  return 0;
 }
 
-
-void print_map(){
-    for (int i = 0; i < MAP_SIZE; i++) {
-        for (int j = 0; j < MAP_SIZE; j++) {
-            if (map[i][j] == 1) {
-                printf("X");
-            } else {
-                printf(" ");
-            }
-        }
-        printf("\n");
+void print_map() {
+  for (int i = 0; i < MAP_SIZE; i++) {
+    for (int j = 0; j < MAP_SIZE; j++) {
+      if (map[i][j] == 1) {
+        printf("X");
+      } else {
+        printf(" ");
+      }
     }
+    printf("\n");
+  }
 }

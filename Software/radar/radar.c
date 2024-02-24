@@ -71,14 +71,19 @@ int main(void) {
   current_location.y = 45;
   int dir = 0;
 
-  // Main loop: print the map
-  while (1) {
-    pthread_mutex_lock(&map_mutex);
-    system("clear");
-    print_map();
-    pthread_mutex_unlock(&map_mutex);
-    sleep(1);
+  // pthread_join(&daq_thread_id, NULL);
+  pthread_join(&del_thread_id, NULL);
+  while(1){
+
   }
+  // Main loop: print the map
+  // while (1) {
+  //   pthread_mutex_lock(&map_mutex);
+  //   system("clear");
+  //   print_map();
+  //   pthread_mutex_unlock(&map_mutex);
+  //   sleep(1);
+  // }
 
   // if thread ends early close the fd
   pthread_mutex_lock(&daq_fd_mutex);
