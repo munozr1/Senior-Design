@@ -78,20 +78,32 @@ int main(void) {
     sleep(1);
   }
 #else
-  int temp_map[MAP_SIZE][MAP_SIZE] = {0};
+    // pthread_join(&del_thread_id,NULL);
+    // pthread_join(&daq_thread_id,NULL);
+  // int temp_map[MAP_SIZE][MAP_SIZE] = {0};
   while (1) {
-    pthread_mutex_lock(&map_mutex);
-    //copy map to temp_map
-    for (int i = 0; i < MAP_SIZE; i++) {
-      for (int j = 0; j < MAP_SIZE; j++) {
-        temp_map[i][j] = map[i][j];
-      }
-    }
-    pthread_mutex_unlock(&map_mutex);
-    system("clear");
-    print_map();
-    //sleep for .5 seconds
-    usleep(250000);
+  //   pthread_mutex_lock(&map_mutex);
+  //   //copy map to temp_map
+  //   for (int i = 0; i < MAP_SIZE; i++) {
+  //     for (int j = 0; j < MAP_SIZE; j++) {
+  //       temp_map[i][j] = map[i][j];
+  //     }
+  //   }
+  //   pthread_mutex_unlock(&map_mutex);
+  //   system("clear");
+  //   // print temp_map
+  //   for (int i = 0; i < MAP_SIZE; i++) {
+  //     for (int j = 0; j < MAP_SIZE; j++) {
+  //       if (temp_map[i][j] == 1) {
+  //         printf("X");
+  //       } else {
+  //         printf(" ");
+  //       }
+  //     }
+  //     printf("\n");
+  //   }
+  //   // sleep for .5 seconds
+  //   usleep(250000);
   }
 
 #endif

@@ -32,6 +32,8 @@ void *daq_thread_read_com() {
       #endif
       map_point(daq_buffer);
       buffer_head = (buffer_head + 1) % BUFFER_SIZE; // wrap around the ring buffer
+      printf("\033[2J\033[H");
+      print_map();
       pthread_mutex_unlock(&map_mutex);
       #ifdef DEBUG
       printf("daq_thread_read_com => map_mutex released\n");
@@ -83,7 +85,7 @@ void *del_thread_buffer_maintinance() {
     time(&currentTime);
 
     // Iterate while the head points to a point that's too old
-    while (buffer_tail != buffer_head && difftime(currentTime, map_ring_buffer[buffer_tail].created) > 1) {
+    while(buffer_tail != buffer_head && difftime(currentTime, map_ring_buffer[buffer_tail].created) > 0.5) {
       map[map_ring_buffer[buffer_tail].x][map_ring_buffer[buffer_tail].y] = 0; // Remove the point from the map
       buffer_tail = (buffer_tail + 1) % BUFFER_SIZE; // Move the tail to the next point
     }
