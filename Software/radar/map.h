@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 //Circular buffer size is 180 because the LiDAR sensor has a 180 degree field of view
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 360
 #define MAP_SIZE 150
 #define PI 3.14159265358979323846
 

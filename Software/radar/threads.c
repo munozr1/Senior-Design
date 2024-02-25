@@ -47,8 +47,7 @@ void *daq_thread_read_com() {
 * of a ring buffer used for storing points on a map. It aims to remove points from
 * the buffer that are older than a certain age, ensuring that the buffer does not
 * hold outdated information. The function sleeps for 1 second upon starting to give
-* the map_thread a head start, which is necessary to avoid removing data that has
-* not yet been processed.
+* the map_thread a head start.
 *
 * The function enters an infinite loop where it first checks if the buffer is empty
 * by comparing the buffer_tail and buffer_head indices. If the buffer is empty, it

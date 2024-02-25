@@ -50,8 +50,9 @@ void map_point(char *polarCoord) {
   int x = (int)(distance * cos(angle));
   int y = (int)(distance * sin(angle));
 
-  int gridX = x + current_location.x;
+  int gridX = x + current_location.x; // Add the current location to the point to get the grid location of the point
   int gridY = y + current_location.y;
+
   if (gridX < 0 || gridX >= MAP_SIZE || gridY < 0 || gridY >= MAP_SIZE)
     return;
 
