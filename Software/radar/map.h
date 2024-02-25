@@ -40,5 +40,4 @@ double deg2rad(double deg);
 double mm2in(double mm);
 void map_point(char *polarCoord);
 void clear_map();
-void * del_thread_buffer_del();
 void print_map();

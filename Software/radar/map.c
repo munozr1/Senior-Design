@@ -1,5 +1,4 @@
 #include "map.h"
-#include "read_com.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,17 +14,35 @@ struct ChargingStation B = {0, 0, 'B', 0, &C};
 struct ChargingStation A = {0, 0, 'A', 0, &B};
 struct Coordinate current_location = {0, 0};
 
+
+/*
+* This function is used to convert the distance from the sensor to inches.
+* --------------------------------------------------------------------------
+* @param dobule mm: the distance from the sensor in millimeters
+* @return: the distance from the sensor in inches
+*/
 double mm2inches(double mm) { return mm / 25.4; }
 
+/*
+* This function is used to convert angles from degrees to radians.
+* --------------------------------------------------------------------------
+* @param double deg: Angle in degrees
+* @return: Angle in radians
+*/
 double deg2rad(double deg) { return deg * (PI / 180); }
 
+
+/*
+* This function is used to map a point to the map.
+* -------------------------------------------------
+* @param char *polarCoord: The polar coordinate string to be mapped
+*/
 void map_point(char *polarCoord) {
   double distance, angle;
 
   // parse the polar coordinate input string
   sscanf(polarCoord, "%lf@%lf", &angle, &distance);
-  // if we read a distance bigger than we can accomidate just ignore it. This is
-  // more used for testing purposes. Its a good saftey though.
+  // if we read a distance bigger than we can accomidate just ignore it. This is more used for testing purposes. Its a good saftey though.
   if (distance > MAP_SIZE)
     return;
 
@@ -38,7 +55,6 @@ void map_point(char *polarCoord) {
   if (gridX < 0 || gridX >= MAP_SIZE || gridY < 0 || gridY >= MAP_SIZE)
     return;
 
-
   if (gridX >= 0 && gridX < MAP_SIZE && gridY >= 0 && gridY < MAP_SIZE) {
     map_ring_buffer[buffer_head].x = gridX; // Add the point to the ring buffer
     map_ring_buffer[buffer_head].y = gridY;
@@ -50,31 +66,11 @@ void map_point(char *polarCoord) {
   }
 }
 
-void *del_thread_buffer_del() {
-  sleep(1); // Sleep for 1 second to let the map_thread get a head start
-  while (1) {
-    if (buffer_tail == buffer_head) // if buffer is empty
-      continue;
-    pthread_mutex_lock(&map_mutex);
-    #ifdef DEBUG
-    printf("del_thread_buffer_del => map_mutex obtained\n");
-    #endif
-    time_t currentTime; // Get the current time
-    time(&currentTime);
-
-    // Iterate while the head points to a point that's too old
-    while (buffer_tail != buffer_head && difftime(currentTime, map_ring_buffer[buffer_tail].created) > 1) {
-      map[map_ring_buffer[buffer_tail].x][map_ring_buffer[buffer_tail].y] = 0; // Remove the point from the map
-      buffer_tail = (buffer_tail + 1) % BUFFER_SIZE; // Move the tail to the next point
-    }
-    pthread_mutex_unlock(&map_mutex);
-    #ifdef DEBUG
-    printf("del_thread_buffer_del => map_mutex released\n");
-    #endif
-  }
-}
-
-  void print_map() {
+/*
+* This function is used to print the map to the console.
+* ------------------------------------------------------
+*/
+void print_map() {
     for (int i = 0; i < MAP_SIZE; i++) {
       for (int j = 0; j < MAP_SIZE; j++) {
         if (map[i][j] == 1) {
