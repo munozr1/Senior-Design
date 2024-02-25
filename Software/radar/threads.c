@@ -32,8 +32,6 @@ void *daq_thread_read_com() {
       #endif
       map_point(daq_buffer);
       buffer_head = (buffer_head + 1) % BUFFER_SIZE; // wrap around the ring buffer
-      printf("\033[2J\033[H");
-      print_map();
       pthread_mutex_unlock(&map_mutex);
       #ifdef DEBUG
       printf("daq_thread_read_com => map_mutex released\n");

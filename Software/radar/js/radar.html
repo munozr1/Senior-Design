@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Radar Visualization</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    .radar-container {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .radar-point {
+      position: absolute;
+      background-color: red;
+      width: 4px; height: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="radar-container"></div>
+
+  <script src="bundle.js"></script>
+
+</body>
+</html>
