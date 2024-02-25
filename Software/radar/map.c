@@ -35,19 +35,15 @@ void map_point(char *polarCoord) {
 
   int gridX = x + current_location.x;
   int gridY = y + current_location.y;
-  if (gridX < 0 || gridX >= MAP_SIZE || gridY < 0 || gridY >= MAP_SIZE) {
-    // Coordinates are out of bounds
+  if (gridX < 0 || gridX >= MAP_SIZE || gridY < 0 || gridY >= MAP_SIZE)
     return;
-  }
 
-  // Add the point to the ring buffer. Add a timestamp so that the deletion
-  // thread knows when to delete the point
-  map_ring_buffer[buffer_head].x = gridX;
-  map_ring_buffer[buffer_head].y = gridY;
-  time(&map_ring_buffer[buffer_head].created);
 
   if (gridX >= 0 && gridX < MAP_SIZE && gridY >= 0 && gridY < MAP_SIZE) {
-    map[gridX][gridY] = 1;
+    map_ring_buffer[buffer_head].x = gridX; // Add the point to the ring buffer
+    map_ring_buffer[buffer_head].y = gridY;
+    time(&map_ring_buffer[buffer_head].created); // Add a timestamp
+    map[gridX][gridY] = 1;// Add the point to the map
   } else {
     printf("Point map[%d][%d] (%lf, %lf) is out of bounds\n", gridX, gridY,
            distance, angle);
@@ -55,21 +51,26 @@ void map_point(char *polarCoord) {
 }
 
 void *del_thread_buffer_del() {
-  sleep(1);
+  sleep(1); // Sleep for 1 second to let the map_thread get a head start
   while (1) {
-    if (buffer_tail == buffer_head)
+    if (buffer_tail == buffer_head) // if buffer is empty
       continue;
     pthread_mutex_lock(&map_mutex);
+    #ifdef DEBUG
     printf("del_thread_buffer_del => map_mutex obtained\n");
-    time_t currentTime;
+    #endif
+    time_t currentTime; // Get the current time
     time(&currentTime);
 
     // Iterate while the head points to a point that's too old
     while (buffer_tail != buffer_head && difftime(currentTime, map_ring_buffer[buffer_tail].created) > 1) {
-      map[map_ring_buffer[buffer_tail].x][map_ring_buffer[buffer_tail].y] = 0;
+      map[map_ring_buffer[buffer_tail].x][map_ring_buffer[buffer_tail].y] = 0; // Remove the point from the map
+      buffer_tail = (buffer_tail + 1) % BUFFER_SIZE; // Move the tail to the next point
     }
     pthread_mutex_unlock(&map_mutex);
+    #ifdef DEBUG
     printf("del_thread_buffer_del => map_mutex released\n");
+    #endif
   }
 }
 

@@ -26,7 +26,7 @@ int main(void) {
       daq_thread_id; // Thread responsible for Data Aquisition from sensors
   pthread_t del_thread_id; // Thread responsible for deleting old points in map
   // config to read com port
-  const char *serial_port_path = "/dev/cu.usbmodem14101";
+  const char *serial_port_path = "/dev/cu.usbmodem14201";
   struct termios tio;
 
   // Open port
@@ -72,8 +72,8 @@ int main(void) {
   current_location.y = 45;
   int dir = 0;
 
-pthread_join(&daq_thread_id, NULL);
-pthread_join(&del_thread_id, NULL);
+// pthread_join(&daq_thread_id, NULL);
+// pthread_join(&del_thread_id, NULL);
 // while(1){
 
 // }
