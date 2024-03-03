@@ -3,7 +3,7 @@
 #include <pthread.h>
 
 /*
-* Function: daq_thread_read_com
+* Function: daq_thread_read
 * -----------------------------
 * This function is intended to be run as a thread responsible for reading data
 * from a data acquisition system (DAQ). It continuously reads bytes from a serial
@@ -17,31 +17,27 @@
 */
 void daq_thread_read() {
   // Read and print data
-  while (1) {
-    if ((buffer_head + 1) % BUFFER_SIZE == buffer_tail) // if buffer if full
-        continue;
-
-   int bytes_read = read(daq_fd, daq_buffer, sizeof(daq_buffer));
-    if (bytes_read < 0) {
-      perror("daq_thread_read_com => Error reading from serial port");
-    } else {
-      daq_buffer[bytes_read] = '\0'; // Null terminate the string
-      pthread_mutex_lock(&map_mutex);
-      #ifdef DEBUG
-      printf("daq_thread_read_com => map_mutex obtained\n");
-      #endif
-      map_point(daq_buffer);
-      buffer_head = (buffer_head + 1) % BUFFER_SIZE; // wrap around the ring buffer
-      pthread_mutex_unlock(&map_mutex);
-      #ifdef DEBUG
-      printf("daq_thread_read_com => map_mutex released\n");
-      #endif
+    if ((buffer_head + 1) % BUFFER_SIZE != buffer_tail){ // if buffer if full
+      int bytes_read = read(daq_fd, daq_buffer, sizeof(daq_buffer));
+      if (bytes_read < 0) {
+        perror("daq_thread_read_com => Error reading from serial port");
+      } else {
+        daq_buffer[bytes_read] = '\0'; // Null terminate the string
+        pthread_mutex_lock(&map_mutex);
+        #ifdef DEBUG
+        printf("daq_thread_read_com => map_mutex obtained\n");
+        #endif
+        map_point(daq_buffer);
+        buffer_head = (buffer_head + 1) % BUFFER_SIZE; // wrap around the ring buffer
+        pthread_mutex_unlock(&map_mutex);
+        #ifdef DEBUG
+        printf("daq_thread_read_com => map_mutex released\n");
+        #endif
     }
-  }
 }
 
 /*
-* Function: del_thread_buffer_maintinance
+* Function: update_thread_buffer
 * ---------------------------------------
 * This function is designed to run as a separate thread that maintains the integrity
 * of a ring buffer used for storing points on a map. It aims to remove points from
@@ -71,26 +67,24 @@ void daq_thread_read() {
 * brief pause to prevent excessive CPU usage from tight looping.
 */
 void update_thread_buffer() {
-  sleep(1); // Sleep for 1 second to let the map_thread get a head start
-  while (1) {
-    if (buffer_tail == buffer_head) // if buffer is empty
-      continue;
-    pthread_mutex_lock(&map_mutex);
-    #ifdef DEBUG
-    printf("update_thread_buffer => map_mutex obtained\n");
-    #endif
-    time_t currentTime; // Get the current time
-    time(&currentTime);
+  
+    if (!buffer_tail == buffer_head){ // if buffer is empty
+      pthread_mutex_lock(&map_mutex);
+      #ifdef DEBUG
+      printf("update_thread_buffer => map_mutex obtained\n");
+      #endif
+      time_t currentTime; // Get the current time
+      time(&currentTime);
 
-    // Iterate while the head points to a point that's too old
-    while(buffer_tail != buffer_head && difftime(currentTime, map_ring_buffer[buffer_tail].created) > 0.5) {
-      map[map_ring_buffer[buffer_tail].x][map_ring_buffer[buffer_tail].y] = 0; // Remove the point from the map
-      buffer_tail = (buffer_tail + 1) % BUFFER_SIZE; // Move the tail to the next point
+      // Iterate while the head points to a point that's too old
+      while(buffer_tail != buffer_head && difftime(currentTime, map_ring_buffer[buffer_tail].created) > 0.5) {
+        map[map_ring_buffer[buffer_tail].x][map_ring_buffer[buffer_tail].y] = 0; // Remove the point from the map
+        buffer_tail = (buffer_tail + 1) % BUFFER_SIZE; // Move the tail to the next point
+      }
+
+      pthread_mutex_unlock(&map_mutex);
+      #ifdef DEBUG
+      printf("update_thread_buffer => map_mutex released\n");
+      #endif
     }
-
-    pthread_mutex_unlock(&map_mutex);
-    #ifdef DEBUG
-    printf("update_thread_buffer => map_mutex released\n");
-    #endif
-  }
 }
