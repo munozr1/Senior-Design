@@ -20,9 +20,6 @@ char daq_buffer[15]; // Data Aquisition Buffer: used to store the info sent from
 int main(void) {
   // make station linked list circular
   H.next = &A;
-  // init threads;
-  pthread_t daq_thread_id; // Thread responsible for Data Aquisition from sensors
-  pthread_t del_thread_id; // Thread responsible for deleting old points in map
   // config to read com port
   const char *serial_port_path = "/dev/cu.usbmodem14201";
   struct termios tio; // Terminal I/O
