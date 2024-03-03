@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define BAUDRATE B9600
+
 // create map and buffer
 pthread_mutex_t map_mutex = PTHREAD_MUTEX_INITIALIZER; // The map mutex is used to ensure that only one thread can access the map at a time.
 int map[MAP_SIZE][MAP_SIZE] = {0}; // The map is used to store the points that are mapped.
@@ -33,8 +35,8 @@ int main(void) {
 
   // Configure port
   memset(&tio, 0, sizeof(tio));
-  cfsetospeed(&tio, B9600);
-  cfsetispeed(&tio, B9600);
+  cfsetospeed(&tio, BAUDRATE);
+  cfsetispeed(&tio, BAUDRATE);
   tio.c_cflag &= ~PARENB;
   tio.c_cflag &= ~CSTOPB;
   tio.c_cflag &= ~CSIZE;
