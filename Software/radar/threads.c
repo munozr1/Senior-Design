@@ -35,6 +35,7 @@ void daq_thread_read() {
         #endif
     }
 }
+}
 
 /*
 * Function: update_thread_buffer
@@ -68,7 +69,7 @@ void daq_thread_read() {
 */
 void update_thread_buffer() {
   
-    if (!buffer_tail == buffer_head){ // if buffer is empty
+    if (buffer_tail != buffer_head){ // if buffer is empty
       pthread_mutex_lock(&map_mutex);
       #ifdef DEBUG
       printf("update_thread_buffer => map_mutex obtained\n");
