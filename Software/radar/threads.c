@@ -15,7 +15,7 @@
 * unlocked to allow other threads to access the shared resources. If compiled with the
 * DEBUG flag, it prints messages upon acquiring and releasing the mutex.
 */
-void *daq_thread_read_com() {
+void daq_thread_read() {
   // Read and print data
   while (1) {
     if ((buffer_head + 1) % BUFFER_SIZE == buffer_tail) // if buffer if full
@@ -70,14 +70,14 @@ void *daq_thread_read_com() {
 * shared resources and then continues to the next iteration of its loop after a
 * brief pause to prevent excessive CPU usage from tight looping.
 */
-void *del_thread_buffer_maintinance() {
+void update_thread_buffer() {
   sleep(1); // Sleep for 1 second to let the map_thread get a head start
   while (1) {
     if (buffer_tail == buffer_head) // if buffer is empty
       continue;
     pthread_mutex_lock(&map_mutex);
     #ifdef DEBUG
-    printf("del_thread_buffer_del => map_mutex obtained\n");
+    printf("update_thread_buffer => map_mutex obtained\n");
     #endif
     time_t currentTime; // Get the current time
     time(&currentTime);
@@ -90,7 +90,7 @@ void *del_thread_buffer_maintinance() {
 
     pthread_mutex_unlock(&map_mutex);
     #ifdef DEBUG
-    printf("del_thread_buffer_del => map_mutex released\n");
+    printf("update_thread_buffer => map_mutex released\n");
     #endif
   }
 }

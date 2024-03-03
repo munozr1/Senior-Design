@@ -46,67 +46,19 @@ int main(void) {
   tcsetattr(daq_fd, TCSANOW, &tio);
   tcflush(daq_fd, TCIFLUSH);
 
-  // init reading data from com port
-  if (pthread_create(&daq_thread_id, NULL, daq_thread_read_com, NULL) != 0) {
-    perror("Failed to create DAQ thread");
-    close(daq_fd);
-    return -1;
-  } else {
-    printf("daq thread created \n");
-  }
-
-  // init deleting old points in map
-  if (pthread_create(&del_thread_id, NULL, del_thread_buffer_maintinance, NULL) != 0) {
-    perror("Failed to create delete thread \n");
-    close(daq_fd);
-    return -1;
-  } else {
-    printf("delete thread created \n");
-  }
 
   // Set starting position, this should be set via bluetooth or something. Hard coded for now.
-  current_location.x = 45;
-  current_location.y = 45;
+  current_location.x = 70;
+  current_location.y = 70;
 
 // Main loop: print the map
-#ifdef DEBUG
-  while (1) {
-    pthread_mutex_lock(&map_mutex);
-    printf("main => map_mutex obtained\n");
-    printf("main => map_mutex released\n");
-    pthread_mutex_unlock(&map_mutex);
-    sleep(1);
-  }
-#else
-  int temp_map[MAP_SIZE][MAP_SIZE] = {0};
-  while (1) {
-    pthread_mutex_lock(&map_mutex);
-    //copy map to temp_map
-    for (int i = 0; i < MAP_SIZE; i++) {
-      for (int j = 0; j < MAP_SIZE; j++) {
-        temp_map[i][j] = map[i][j];
-      }
-    }
-    pthread_mutex_unlock(&map_mutex);
+  while(1){
+    update_thread_buffer();
+    daq_thread_read();
     system("clear");
-    // print the clear ascci
-    printf("\033[2J");
-    // print temp_map
-    for (int i = 0; i < MAP_SIZE; i++) {
-      for (int j = 0; j < MAP_SIZE; j++) {
-        if (temp_map[i][j] == 1) {
-          printf("X");
-        } else {
-          printf(" ");
-        }
-      }
-      printf("\n");
-    }
-    // sleep for .5 seconds
-    sleep(1);
-    // usleep(250000);
+    print_map();
+    //sleep for .25 seconds
+    usleep(250000);
   }
-
-#endif
-  return 0;
+ return 0;
 }
